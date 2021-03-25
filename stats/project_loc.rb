@@ -1,5 +1,7 @@
-if `git rev-parse --abbrev-ref HEAD`.chomp != 'develop'
-  raise 'Your branch is not develop. Only do this on develop'
+MAIN_BRANCH='master'
+
+if `git rev-parse --abbrev-ref HEAD`.chomp != MAIN_BRANCH
+  raise "Your branch is not #{MAIN_BRANCH}. Only do this on #{MAIN_BRANCH}"
 end
 
 $LOAD_PATH << File.expand_path(__dir__)
@@ -47,11 +49,11 @@ begin
 
   storage.save(rows)
 
-  `git checkout develop`
+  `git checkout #{MAIN_BRANCH}`
 rescue Exception => e
 
   puts e.message
   puts e.backtrace
-  puts "Failed hardcore, going back to develop branch"
-  `git checkout develop`
+  puts "Failed hardcore, going back to #{MAIN_BRANCH} branch"
+  `git checkout #{MAIN_BRANCH}`
 end
