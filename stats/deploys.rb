@@ -4,10 +4,16 @@ require 'date'
 require 'persistance/csv'
 
 module Kpis
+
+  # When we began tagging commits to define a deploy
+  EARLIEST_DATE = Date.new(2019,8)
+
+  Tag = Struct.new(:tag, :date, keyword_init: true)
+
   class Deploys
 
     def self.from_git_versions
-      version_lines = %x(git log --tags --simplify-by-decoration --pretty="format:%ai %d"|grep tag|grep " v").split("\n")
+      version_lines = %x(git log --tags --simplify-by-decoration --pretty="format:%ai %d"|grep tag).split("\n")
       new(version_lines)
     end
 
@@ -26,8 +32,7 @@ module Kpis
     end
 
     def find_deploys_per_month
-      tags = version_lines.map{ |version_raw| get_tags(version_raw) }.flatten
-
+      tags = version_lines.map{ |version_raw| get_tag(version_raw) }
       tags.reduce(prime_dates_hash) do |hash, tag|
         key = "#{tag.date.year}-#{tag.date.month}"
 
@@ -42,14 +47,15 @@ module Kpis
     # Expected format:
     # 2019-11-29 14:50:01 +0100  (tag: v3.3.1, tag: v3.3.0)
     # 2019-12-03 11:22:04 +0100  (tag: v3.3.2)
-    # returns an array of tags because some dates have multiple tags
-    def get_tags(version_line)
+    # 2019-12-03 11:22:04 +0100  (tag: 3.300.2)
+    # @returns [Tag] a tag for commit
+    def get_tag(version_line)
       date = version_line[DATE_REGEX]
-      tags = version_line.scan(/tag: v(\d+\.\d+\.\d+)/).flatten
+      tags = version_line.scan(/tag: v?(\d+\.\d+\.\d+)/).flatten
 
-      tags.map do |tag|
-        OpenStruct.new(tag: tag, date: Date.parse(date))
-      end
+      # if a commit has multiple tags, just take the first, b/c there is only one valid deploy per commit
+      tag = tags.first
+      Tag.new(tag: tag, date: Date.parse(date))
     end
 
     # Use this string to represent the dates in the hash keys
@@ -59,8 +65,7 @@ module Kpis
 
     # Fill the dates hash so that missing entries still have 0 deploys
     def prime_dates_hash
-      earliest_date = Date.new(2019,8)
-      current_date = earliest_date
+      current_date = EARLIEST_DATE
       dates = {}
       while current_date < Date.today
         dates[key_from_date(current_date)] = 0
