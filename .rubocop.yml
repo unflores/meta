@@ -1,2 +1,2 @@
 Style/GuardClause:
-  Enabled: false
+  Enabled: false # Allows for any styling for guard clauses
