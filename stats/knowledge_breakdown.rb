@@ -33,7 +33,7 @@ def transform_data(knowledge_data, author_knowledge)
   author_knowledge
 end
 
-files = Dir["#{directory}**/*.rb"]
+files = Dir["#{directory}**/*.*"]
 
 author_knowledge = {}
 
@@ -42,6 +42,6 @@ files.each do |file|
   author_knowledge = transform_data(raw_file_data, author_knowledge)
 end
 
-author_knowledge.each do |name, lines|
+author_knowledge.sort_by{|key, value| -value }.each do |name, lines|
   puts "#{name}: #{lines}"
 end
