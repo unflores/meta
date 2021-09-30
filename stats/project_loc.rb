@@ -1,4 +1,4 @@
-MAIN_BRANCH='master'
+MAIN_BRANCH = 'master'.freeze
 
 if `git rev-parse --abbrev-ref HEAD`.chomp != MAIN_BRANCH
   raise "Your branch is not #{MAIN_BRANCH}. Only do this on #{MAIN_BRANCH}"
@@ -32,16 +32,14 @@ rows = {
   coffee: []
 }
 
-
-
 begin
   while commits_backward <= commits.length
     `git checkout #{commits[commits_backward]}`
 
-    loc_check.each { |key, finder|
+    loc_check.each do |key, finder|
       # wc -l returns multiple totals sometimes, ugh
-      rows[key] << `#{finder}`.split("\n").filter{|count_line| count_line[/ total/] }.map{|total_line| total_line[/[0-9]+/].to_i}.sum
-    }
+      rows[key] << `#{finder}`.split("\n").filter { |count_line| count_line[/ total/] }.map { |total_line| total_line[/[0-9]+/].to_i }.sum
+    end
     rows[:headers] << `git show -q --pretty="format:%ai"`[DATE_REGEX]
 
     commits_backward += 50
@@ -51,7 +49,6 @@ begin
 
   `git checkout #{MAIN_BRANCH}`
 rescue Exception => e
-
   puts e.message
   puts e.backtrace
   puts "Failed hardcore, going back to #{MAIN_BRANCH} branch"

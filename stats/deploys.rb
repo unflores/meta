@@ -4,16 +4,14 @@ require 'date'
 require 'persistance/csv'
 
 module Kpis
-
   # When we began tagging commits to define a deploy
-  EARLIEST_DATE = Date.new(2019,8)
+  EARLIEST_DATE = Date.new(2019, 8)
 
   Tag = Struct.new(:tag, :date, keyword_init: true)
 
   class Deploys
-
     def self.from_git_versions
-      version_lines = %x(git log --tags --simplify-by-decoration --pretty="format:%ai %d"|grep tag).split("\n")
+      version_lines = `git log --tags --simplify-by-decoration --pretty="format:%ai %d"|grep tag`.split("\n")
       new(version_lines)
     end
 
@@ -32,13 +30,12 @@ module Kpis
     end
 
     def find_deploys_per_month
-      tags = version_lines.map{ |version_raw| get_tag(version_raw) }
-      tags.reduce(prime_dates_hash) do |hash, tag|
+      tags = version_lines.map { |version_raw| get_tag(version_raw) }
+      tags.each_with_object(prime_dates_hash) do |tag, hash|
         key = "#{tag.date.year}-#{tag.date.month}"
 
         hash[key] ||= 0
         hash[key] += 1
-        hash
       end
     end
 
@@ -73,7 +70,6 @@ module Kpis
       end
       dates
     end
-
   end
 end
 

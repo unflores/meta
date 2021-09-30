@@ -2,7 +2,6 @@ require 'csv'
 
 module Persistance
   class Csv
-
     attr_accessor :storage_name
 
     CSV_PATH = File.join(
@@ -30,7 +29,6 @@ module Persistance
           data.each do |key, values|
             csv << values.unshift(key)
           end
-
         end
       end
     end
