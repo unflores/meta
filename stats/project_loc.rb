@@ -4,6 +4,8 @@ if `git rev-parse --abbrev-ref HEAD`.chomp != MAIN_BRANCH
   raise "Your branch is not #{MAIN_BRANCH}. Only do this on #{MAIN_BRANCH}"
 end
 
+class CheckoutFailure < StandardError; end
+
 $LOAD_PATH << File.expand_path(__dir__)
 require 'persistance/csv'
 require 'byebug'
@@ -32,9 +34,17 @@ rows = {
   coffee: []
 }
 
+def checkout_commit(commit_hash)
+  checkout_command = "git checkout #{commit_hash}"
+  success = system(checkout_command)
+  unless success
+    raise CheckoutFailure, "Checkout failed with '#{checkout_command}'"
+  end
+end
+
 begin
   while commits_backward <= commits.length
-    `git checkout #{commits[commits_backward]}`
+    checkout_commit(commits[commits_backward])
 
     loc_check.each do |key, finder|
       # wc -l returns multiple totals sometimes, ugh
