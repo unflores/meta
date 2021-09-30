@@ -1,6 +1,8 @@
 require 'csv'
 
 module Persistance
+  # The persistance class for writing to a CSV.
+  # This file will take a hash with headers or without and write that to a csv
   class Csv
     attr_accessor :storage_name
 
@@ -13,27 +15,36 @@ module Persistance
       @storage_name = storage_name
     end
 
+    # @params [Hash] data that is being written
+    # Ex. { headers: ['calls', 'ifs'], ruby: [1, 8]}
     def save(data)
       if data[:headers].nil?
-        CSV.open(file_path, 'wb') do |csv|
-          csv << data.keys
-          csv << data.values
-        end
+        write(data)
       else
-
-        CSV.open(file_path, 'wb') do |csv|
-          headers = data.delete(:headers)
-          headers.unshift('')
-          csv << headers
-
-          data.each do |key, values|
-            csv << values.unshift(key)
-          end
-        end
+        write_with_headers(data)
       end
     end
 
     private
+
+    def write(data)
+      CSV.open(file_path, 'wb') do |csv|
+        csv << data.keys
+        csv << data.values
+      end
+    end
+
+    def write_with_headers(data)
+      CSV.open(file_path, 'wb') do |csv|
+        headers = data.delete(:headers)
+        headers.unshift('')
+        csv << headers
+
+        data.each do |key, values|
+          csv << values.unshift(key)
+        end
+      end
+    end
 
     def file_path
       CSV_PATH.gsub('__storage_name__', storage_name)
