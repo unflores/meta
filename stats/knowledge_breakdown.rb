@@ -42,6 +42,6 @@ files.each do |file|
   author_knowledge = transform_data(raw_file_data, author_knowledge)
 end
 
-author_knowledge.sort_by{|key, value| -value }.each do |name, lines|
+author_knowledge.sort_by { |_key, value| -value }.each do |name, lines|
   puts "#{name}: #{lines}"
 end
