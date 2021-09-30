@@ -8,7 +8,7 @@ $LOAD_PATH << File.expand_path(__dir__)
 require 'persistance/csv'
 require 'byebug'
 
-storage = Persistance::Csv.new('ruby_LOC')
+storage = Persistance::Csv.new('LOC')
 
 commits = `git log --pretty=oneline --no-merges| awk -F" " '{print $1}'`.split("\n")
 
