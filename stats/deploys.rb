@@ -2,6 +2,7 @@ $LOAD_PATH << File.expand_path(__dir__)
 require 'ostruct'
 require 'date'
 require 'persistance/csv'
+require 'byebug'
 
 module Kpis
   # When we began tagging commits to define a deploy
@@ -31,12 +32,22 @@ module Kpis
 
     def find_deploys_per_month
       tags = version_lines.map { |version_raw| get_tag(version_raw) }
-      tags.each_with_object(prime_dates_hash) do |tag, hash|
+      deploys_per_month = tags.each_with_object(prime_dates_hash) do |tag, hash|
         key = "#{tag.date.year}-#{tag.date.month}"
 
         hash[key] ||= 0
         hash[key] += 1
       end
+      ascending(deploys_per_month)
+    end
+
+    # Takes a hash with YYYY-MM for keys and sorts the keys in ascending order
+    # Hash of form {'2021-1' => 3}
+    def ascending(month_hash)
+      month_hash.map { |val| [Date.new(*val[0].split('-').map(&:to_i)), val[1]] }
+                .sort { |a, b| a <=> b }
+                .map { |val| [val[0].strftime('%Y-%m'), val[1]] }
+                .to_h
     end
 
     private
