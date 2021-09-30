@@ -16,14 +16,14 @@ commits = `git log --pretty=oneline --no-merges| awk -F" " '{print $1}'`.split("
 
 DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/.freeze
 
-project_lines = {}
 commits_backward = 0
 
 loc_check = {
   ruby: "find #{Dir.pwd} -name '*.rb' | xargs wc -l",
-  typescript: "find #{Dir.pwd}/app/javascript -name '*.ts*' | xargs wc -l", # ts* to also catch tsx
-  javascript: "find #{Dir.pwd}/app/javascript -name '*.js*' | xargs wc -l", # js* to also catch jsx
-  coffee: "find #{Dir.pwd}/app/assets/ -name '*.coffee*' | xargs wc -l" # coffee* <- to also catch erb
+  typescript: "find #{Dir.pwd}/app/javascript -name '*.ts*' | xargs wc -l",
+  javascript: "find #{Dir.pwd}/app/javascript -name '*.js*' | xargs wc -l",
+  # coffee* <- to also catch erb
+  coffee: "find #{Dir.pwd}/app/assets/ -name '*.coffee*' | xargs wc -l"
 }
 
 rows = {
@@ -48,7 +48,10 @@ begin
 
     loc_check.each do |key, finder|
       # wc -l returns multiple totals sometimes, ugh
-      rows[key] << `#{finder}`.split("\n").filter { |count_line| count_line[/ total/] }.map { |total_line| total_line[/[0-9]+/].to_i }.sum
+      rows[key] << `#{finder}`.split("\n")
+                              .filter { |count_line| count_line[/ total/] }
+                              .map { |total_line| total_line[/[0-9]+/].to_i }
+                              .sum
     end
     rows[:headers] << `git show -q --pretty="format:%ai"`[DATE_REGEX]
 
