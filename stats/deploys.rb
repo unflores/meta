@@ -5,9 +5,6 @@ require 'persistance/csv'
 require 'byebug'
 
 module Kpis
-  # When we began tagging commits to define a deploy
-  EARLIEST_DATE = Date.new(2019, 8)
-
   Tag = Struct.new(:tag, :date, keyword_init: true)
 
   class Deploys
@@ -32,7 +29,7 @@ module Kpis
 
     def find_deploys_per_month
       tags = version_lines.map { |version_raw| get_tag(version_raw) }
-      deploys_per_month = tags.each_with_object(prime_dates_hash) do |tag, hash|
+      deploys_per_month = tags.each_with_object({}) do |tag, hash|
         key = "#{tag.date.year}-#{tag.date.month}"
 
         hash[key] ||= 0
@@ -71,16 +68,6 @@ module Kpis
       "#{date.year}-#{date.month}"
     end
 
-    # Fill the dates hash so that missing entries still have 0 deploys
-    def prime_dates_hash
-      current_date = EARLIEST_DATE
-      dates = {}
-      while current_date < Date.today
-        dates[key_from_date(current_date)] = 0
-        current_date = current_date.next_month
-      end
-      dates
-    end
   end
 end
 
