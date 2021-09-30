@@ -12,7 +12,8 @@ require 'byebug'
 
 storage = Persistance::Csv.new('LOC')
 
-commits = `git log --pretty=oneline --no-merges| awk -F" " '{print $1}'`.split("\n")
+commits =
+  `git log --pretty=oneline --no-merges| awk -F" " '{print $1}'`.split("\n")
 
 DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/.freeze
 

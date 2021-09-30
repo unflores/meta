@@ -9,7 +9,12 @@ module Kpis
 
   class Deploys
     def self.from_git_versions
-      version_lines = `git log --tags --simplify-by-decoration --pretty="format:%ai %d"|grep tag`.split("\n")
+      version_lines_command = [
+        'git log --tags --simplify-by-decoration --pretty="format:%ai %d"',
+        'grep tag'
+      ].join(' | ')
+
+      version_lines = `#{version_lines_command}`.split("\n")
       new(version_lines)
     end
 
@@ -18,7 +23,10 @@ module Kpis
 
     attr_accessor :version_lines
 
-    def initialize(version_lines, persistance = Persistance::Csv.new(DATA_PERSISTANCE_NAME))
+    def initialize(
+      version_lines,
+      persistance = Persistance::Csv.new(DATA_PERSISTANCE_NAME)
+    )
       @version_lines = version_lines
       @persistance   = persistance
     end
@@ -41,10 +49,21 @@ module Kpis
     # Takes a hash with YYYY-MM for keys and sorts the keys in ascending order
     # Hash of form {'2021-1' => 3}
     def ascending(month_hash)
-      month_hash.map { |val| [Date.new(*val[0].split('-').map(&:to_i)), val[1]] }
+      month_hash.map { |val| [parse_date(val[0]), val[1]] }
                 .sort { |a, b| a <=> b }
-                .map { |val| [val[0].strftime('%Y-%m'), val[1]] }
+                .map { |val| [stringify_date(val[0]), val[1]] }
                 .to_h
+    end
+
+    # @params [String] date 'YYYY-MM'
+    def parse_date(date)
+      Date.new(*date.split('-').map(&:to_i))
+    end
+
+    # @params [Date] date
+    # @returns 'YYYY-MM'
+    def stringify_date(date)
+      date.strftime('%Y-%m')
     end
 
     private
@@ -58,7 +77,8 @@ module Kpis
       date = version_line[DATE_REGEX]
       tags = version_line.scan(/tag: v?(\d+\.\d+\.\d+)/).flatten
 
-      # if a commit has multiple tags, just take the first, b/c there is only one valid deploy per commit
+      # if a commit has multiple tags, just take the first,
+      # b/c there is only one valid deploy per commit
       tag = tags.first
       Tag.new(tag: tag, date: Date.parse(date))
     end
@@ -67,7 +87,6 @@ module Kpis
     def key_from_date(date)
       "#{date.year}-#{date.month}"
     end
-
   end
 end
 
