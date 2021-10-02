@@ -6,13 +6,17 @@ $LOAD_PATH << File.expand_path(__dir__)
 directory = ARGV.first
 
 def check_file_knowledge(filename)
-  git_command = <<-BASH
-    git blame --line-porcelain #{filename}
-      | sed -n 's/^author //p'
-      | sort | uniq -c | sort -rn
-  BASH
+  run_command(
+    <<-BASH
+      git blame --line-porcelain #{filename}
+        | sed -n 's/^author //p'
+        | sort | uniq -c | sort -rn
+    BASH
+  )
+end
 
-  `#{git_command.gsub("\n", '')}`
+def run_command(multi_line_string)
+  `#{multi_line_string.gsub("\n", '')}`
 end
 
 def author_key(first, last)

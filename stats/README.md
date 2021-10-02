@@ -26,3 +26,13 @@ cd some/git/repo
 git checkout master
 ruby dir/to/stats_repo/project_loc.rb
 ```
+
+## Knowledge Breakdown
+
+Given a directory, this script will git-blame all the inner files and find the breakdown of who last touched a file.
+
+### Usage
+```
+ce some/git/repo
+ruby dir/to/stats_repo/knowledge_breakdown.rb app/lib/directory/
+```
