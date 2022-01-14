@@ -3,8 +3,6 @@ require 'pp'
 
 $LOAD_PATH << File.expand_path(__dir__)
 
-directory = ARGV.first
-
 def check_file_knowledge(filename)
   run_command(
     <<-BASH
@@ -36,6 +34,8 @@ def transform_data(knowledge_data, author_knowledge)
 
   author_knowledge
 end
+
+directory = ARGV.first
 
 files = Dir["#{directory}**/*.*"]
 
